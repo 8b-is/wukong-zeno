@@ -33,8 +33,23 @@ wukong-zeno/
   crates/mem8-wave/          fold/unfold, CRC-8, packed trits
   crates/regularity-oracle/  Laplacian, degree partitions, density, pivots
   crates/phoenix-capsule/    Sealed -> Active -> Attenuated -> Consumed
-  examples/omni_zeno_smoke.rs
+  examples/omni_zeno_smoke.rs      canonical end-to-end digest test
+  examples/cayley_bench.rs         exact Q / F_P Cayley vs f64 drift
+  examples/erdos_lodri_e2e.rs      percolation -> shadow cut -> fold -> capsule
+  examples/fp31_bench.rs           branchless Fp31 2M-gate round trip
+  scripts/verify.sh                full gate
 ```
+
+## Examples
+
+| Example | Proves |
+| :--- | :--- |
+| `omni_zeno_smoke` | All five crates through the frozen ABI; digest `0x5F745302BDDBB7DE`. |
+| `cayley_bench` | Exact rational Cayley gate preserves L2 energy; 10 000-step `F_P` invariance; `f64` drift reported, never asserted. |
+| `erdos_lodri_e2e` | Exact Molloy–Reed `κ`, broad `V_2 × V_4` density, `Σ(L₃x) = 0`, four cross-module Cayley gates, fold fixed point, linear capsule. |
+| `fp31_bench` | Branchless Mersenne `F_{2^31−1}` multiply; 2 000 000 forward+inverse gate applications restore every lane bit-for-bit; `f32`/`f64` baselines. |
+
+`scripts/verify.sh` runs the tests, clippy, and all four examples.
 
 ## Build and verify
 
