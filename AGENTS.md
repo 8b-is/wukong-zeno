@@ -123,5 +123,5 @@ during development, never add third-party dependencies.
 
 This repository is a colocated Jujutsu repo. Use `jj` for status, commits, and
 pushes (`jj status`, `jj commit`, `jj git push`); the underlying git repo stays
-intact. Remotes: `origin` = GitHub `8b-is/wukong-zeno`, `codeberg` =
-Codeberg `8b-is/wukong-zeno`.
+intact. `origin` mirrors to both GitHub and Codeberg `8b-is/wukong-zeno` on
+every push; the `codeberg` remote remains for explicit fetch/push.
