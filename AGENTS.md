@@ -118,3 +118,10 @@ cargo check -p pivot-abi -p felix-simd -p mem8-wave -p regularity-oracle -p phoe
 
 Lane rule: edit only your crate directory, run only `cargo test -p <crate>`
 during development, never add third-party dependencies.
+
+## Version control
+
+This repository is a colocated Jujutsu repo. Use `jj` for status, commits, and
+pushes (`jj status`, `jj commit`, `jj git push`); the underlying git repo stays
+intact. Remotes: `origin` = GitHub `8b-is/wukong-zeno`, `codeberg` =
+Codeberg `8b-is/wukong-zeno`.
