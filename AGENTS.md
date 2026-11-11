@@ -14,7 +14,8 @@ zero circular dependencies.
 | `crates/phoenix-capsule` | `V_4` qULB capsule | `pivot-abi` |
 
 Siblings never import each other. The root package `wukong-zeno` exists only to
-host `examples/omni_zeno_smoke.rs` and may use `std`.
+host the `examples/*.rs` targets (`omni_zeno_smoke`, `cayley_bench`,
+`erdos_lodri_e2e`, `fp31_bench`) and may use `std`.
 
 ## Hard invariants
 

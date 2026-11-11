@@ -9,8 +9,8 @@ balanced-ternary computation:
 - `regularity-oracle` - exact rational ternary Laplacian and partitioning.
 - `phoenix-capsule` - qULB typestate capability capsules.
 
-The root `wukong-zeno` package contains only allocation-free helpers plus the
-`omni_zeno_smoke` example, which is the single place where `std` is allowed.
+The root `wukong-zeno` package hosts the `examples/*.rs` targets, which are the
+only places `std` is permitted.
 
 ## Contracts
 

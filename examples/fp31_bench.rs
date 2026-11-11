@@ -23,7 +23,7 @@ const ROUNDS: usize = 250_000;
 
 /// Gate applications counted by `ns_per_gate`: `ROUNDS * 4` forward plus the
 /// same number of inverse applications.
-const TOTAL_APPLICATIONS: u128 = 2_000_000;
+const TOTAL_APPLICATIONS: u128 = (ROUNDS as u128) * 8;
 
 /// Lane pairs touched by the four non-commuting gates.
 const PAIRS: [(usize, usize); 4] = [(5, 13), (9, 1), (2, 7), (3, 12)];
@@ -130,6 +130,10 @@ impl CayleyGateFp31 {
         let ss = s * s;
         let denominator = Fp31::from_i32(
             i32::try_from(ss + rr).expect("Cayley denominator fits in i32"),
+        );
+        debug_assert!(
+            denominator != Fp31::ZERO,
+            "Cayley denominator must be nonzero"
         );
         let inverse = denominator.inv();
         let cosine = Fp31::from_i32(
@@ -328,7 +332,8 @@ fn main() {
             max_delta32 = delta;
         }
     }
-    let ns_f32 = nanos_per_gate(forward_elapsed32, reverse_elapsed32);
+    let ns_f32 = (forward_elapsed32.as_nanos() + reverse_elapsed32.as_nanos()) as f64
+        / TOTAL_APPLICATIONS as f64;
 
     // ------------------------------------------------------------ f64 baseline
     let gates64 = GATE_PARAMS.map(|(r, s)| {
@@ -368,7 +373,8 @@ fn main() {
             max_delta64 = delta;
         }
     }
-    let ns_f64 = nanos_per_gate(forward_elapsed64, reverse_elapsed64);
+    let ns_f64 = (forward_elapsed64.as_nanos() + reverse_elapsed64.as_nanos()) as f64
+        / TOTAL_APPLICATIONS as f64;
 
     // ---------------------------------------------------------------- digest
     // Fingerprint the restored state plus the three exact energy samples.
@@ -387,9 +393,9 @@ fn main() {
     );
     println!("fp31 digest   : 0x{digest:016X}");
     println!(
-        "f32           : ns_per_gate={ns_f32} energy_drift={drift32:.3e} max_delta={max_delta32:.3e}"
+        "f32           : ns_per_gate={ns_f32:.3} energy_drift={drift32:.3e} max_delta={max_delta32:.3e}"
     );
     println!(
-        "f64           : ns_per_gate={ns_f64} energy_drift={drift64:.3e} max_delta={max_delta64:.3e}"
+        "f64           : ns_per_gate={ns_f64:.3} energy_drift={drift64:.3e} max_delta={max_delta64:.3e}"
     );
 }

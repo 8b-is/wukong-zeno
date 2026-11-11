@@ -5,7 +5,7 @@
 //! Host-agnostic smoke-harness package for the `wukong-zeno` workspace.
 //!
 //! The library body only supplies deterministic, allocation-free helpers used
-//! by `examples/omni_zeno_smoke.rs`, which is the single place where `std` is
+//! by the `examples/*.rs` targets, which are the only places where `std` is
 //! permitted.
 
 /// FNV-1a 64-bit digest used for the smoke-run state fingerprint.

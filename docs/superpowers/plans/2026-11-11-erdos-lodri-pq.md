@@ -15,7 +15,7 @@
 - Library crates: `#![no_std]`, allocation-free, no dependencies, no floats. Do not edit them.
 - `pivot-abi` is frozen. Use `RationalPQ::from_ratio(num: i128, den: u128) -> Option<Self>` and the `checked_*` arithmetic; overflow is an error, never a panic or wrap.
 - `KompressFrame32` is exactly 32 bytes; `CentroidPod64` exactly 128 bytes. Do not redefine them.
-- Examples are the only `std` entry points. `f64` is permitted **only** in `examples/cayley_bench.rs`.
+- Examples are the only `std` entry points. `f64`/`f32` are permitted only in `examples/cayley_bench.rs` and `examples/fp31_bench.rs`.
 - Verification gate: `cargo test --workspace --doc`, `cargo clippy --workspace --all-targets -- -D warnings`, then `cargo run --release --example <name>`.
 - Commit after each task. Never touch `examples/omni_zeno_smoke.rs` or its digest `0x5F745302BDDBB7DE`.
 
@@ -124,15 +124,23 @@ Fill the four `todo!()` bodies and `main` so that:
 - Modular phase: apply gates `(r,s) = (1,2), (2,3), (1,3), (3,4)` in a `for step in 0..10_000` loop; before each step record `energy_mod_p`, after each step assert equality. If a denominator is `0 mod P`, panic with a message naming the step (the spec forbids silent inversion).
 - Float phase: same four gates with `f64` `c = (s*s - r*r) as f64 / den as f64`, `sigma = (2*r*s) as f64 / den as f64`; compute the same four rotations from an `f64` copy of the seed; report `drift_ppm = (|e0 - e1| * 1_000_000.0 / e0) as u64`.
 - Print:
-  `cayley exact  : energy preserved over 10000 steps, P=2147483647`
-  `cayley float  : drift_ppm=<n>`
+  `cayley exact  : energy preserved (1 gate, exact Q), P=2147483647`
+  `cayley modular: energy preserved over 10000 steps in F_P`
+  `cayley float  : drift_ppm=0 rel=7.20e-14`
   `digest        : 0x<16 hex>`
 - `std::process::exit(1)` if any exact assertion would fail (use `assert!` — non-zero exit is fine).
 
 - [ ] **Step 2: Run it**
 
 Run: `cargo run --release --example cayley_bench`
-Expected: three lines as above, exit 0, `drift_ppm` prints a nonzero value for the float baseline.
+Expected: four lines and exit 0:
+
+```text
+cayley exact  : energy preserved (1 gate, exact Q), P=2147483647
+cayley modular: energy preserved over 10000 steps in F_P
+cayley float  : drift_ppm=0 rel=7.20e-14
+digest        : 0x3FA60996149177BE
+```
 
 - [ ] **Step 3: Lint**
 
