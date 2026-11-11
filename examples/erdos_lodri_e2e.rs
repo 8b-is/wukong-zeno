@@ -28,6 +28,12 @@ const RAW_LANES: [i16; 16] = [
     8, -7, 6, -5, 12, -11, 10, -9, 4, -3, 2, -1, 14, -13, 16, -15,
 ];
 
+/// Shadow cut edges `(u, v)`, each of weight `1/3`.
+///
+/// Shadow membership is decided by this explicit list, never by weight
+/// equality, so another edge that happens to carry `1/3` is not miscounted.
+const SHADOW_CUT: [(u32, u32); 3] = [(2, 7), (3, 12), (7, 8)];
+
 /// One undirected weighted edge, added in both directions when the CSR is built.
 #[derive(Clone, Copy)]
 struct Edge {
@@ -87,25 +93,26 @@ fn main() {
     let supercritical = kappa > RationalPQ::from_integer(2);
     assert!(supercritical, "Molloy-Reed kappa must exceed 2");
 
-    let shadow_weight = RationalPQ::new(1, 3).expect("shadow weight");
     let shadow_edges = edges
         .iter()
-        .filter(|edge| edge.weight == shadow_weight)
+        .filter(|edge| SHADOW_CUT.contains(&(edge.u, edge.v)))
         .count();
     assert_eq!(shadow_edges, 3, "shadow edges must remain visible");
 
-    // Shadow edges with one endpoint in V2 = [4..7] and one in V4 = [12..15].
+    // Broad V2 x V4 cut: every edge with one endpoint in V2 = [4..7] and one in
+    // V4 = [12..15], whatever its weight. This includes the `1/1` halo bridges
+    // `(5, 13)` and `(6, 13)`, so the cut has 2 of 16 possible crossings.
     let in_v2 = |vertex: u32| (4..=7).contains(&vertex);
     let in_v4 = |vertex: u32| (12..=15).contains(&vertex);
-    let shadow_edges_between_v2_v4 = edges
+    let cut_edges = edges
         .iter()
         .filter(|edge| {
-            edge.weight == shadow_weight
-                && ((in_v2(edge.u) && in_v4(edge.v)) || (in_v4(edge.u) && in_v2(edge.v)))
+            (in_v2(edge.u) && in_v4(edge.v)) || (in_v4(edge.u) && in_v2(edge.v))
         })
         .count();
-    let density = bipartite_density(shadow_edges_between_v2_v4, 4, 4)
-        .expect("bipartite density over V2 x V4");
+    assert_eq!(cut_edges, 2, "V2 x V4 cut is the two halo bridges");
+    let density =
+        bipartite_density(cut_edges, 4, 4).expect("bipartite density over V2 x V4");
 
     // ---------------------------------------------------------------- hodge
     let mut wave = [RationalPQ::ZERO; VERTICES];
@@ -150,8 +157,11 @@ fn main() {
     let second = fold_super_ultra(&unfolded, threshold, 1, 14);
     let unfolded_second = unfold_super_ultra(&second).expect("second unfold");
     let third = fold_super_ultra(&unfolded_second, threshold, 1, 14);
-    assert_eq!(
-        second, third,
+    // The printed fixed-point flag comes from the fold/unfold refold assertion,
+    // not from the qULB loop: the second fold generation is the fixed point.
+    let fixed_point = second == third;
+    assert!(
+        fixed_point,
         "second fold generation must be an exact fixed point"
     );
 
@@ -178,8 +188,6 @@ fn main() {
         .unwrap_or_else(|_| panic!("capsule attenuation failed"))
         .consume();
     assert_eq!(consumed, pod, "capsule must return the sealed pod");
-
-    let fixed_point = loop_fixed;
 
     // --------------------------------------------------------------- digest
     let mut buffer = Vec::with_capacity(192);
@@ -253,7 +261,7 @@ fn undirected_edges() -> Vec<Edge> {
     }
 
     let shadow = RationalPQ::new(1, 3).expect("shadow weight");
-    for (u, v) in [(2u32, 7u32), (3, 12), (7, 8)] {
+    for (u, v) in SHADOW_CUT {
         edges.push(Edge {
             u,
             v,
