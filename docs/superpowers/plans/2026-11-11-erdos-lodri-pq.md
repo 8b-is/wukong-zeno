@@ -270,7 +270,7 @@ Assert:
 - [ ] **Step 3: f32/f64 baselines**
 
 Same gate schedule and seeds in `f32` and `f64`; forward then inverse. Report:
-- `ns_per_gate` for each backend (integer, from `Instant::now()`; wall-clock is allowed here);
+- `ns_per_gate` for each backend (integer for `fp31`; fractional for the float backends, since their per-gate time is sub-nanosecond; wall-clock is allowed here);
 - midpoint L2 drift and `max |Δψ|` for the float backends, in scientific notation;
 - float reversal error must be **reported**, never asserted to be nonzero (it may be tiny but nonzero; do not fabricate).
 
