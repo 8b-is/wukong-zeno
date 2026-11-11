@@ -1,0 +1,16 @@
+[package]
+name = "phoenix-capsule"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.83"
+authors = ["Peter Jozsef Lodri <peter@8b.is>"]
+description = "qULB typestate capability capsules with monotone attenuation"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/8b-is/wukong-zeno"
+
+[lib]
+name = "phoenix_capsule"
+path = "src/lib.rs"
+
+[dependencies]
+pivot-abi = { path = "../pivot-abi", version = "0.2.0" }

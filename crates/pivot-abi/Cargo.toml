@@ -1,0 +1,15 @@
+[package]
+name = "pivot-abi"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.83"
+authors = ["Peter Jozsef Lodri <peter@8b.is>"]
+description = "Frozen central mediator ABI: exact p/q rationals, balanced ternary, kompress frames"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/8b-is/wukong-zeno"
+
+[lib]
+name = "pivot_abi"
+path = "src/lib.rs"
+
+[dependencies]

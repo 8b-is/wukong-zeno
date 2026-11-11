@@ -1,0 +1,16 @@
+[package]
+name = "mem8-wave"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.83"
+authors = ["Peter Jozsef Lodri <peter@8b.is>"]
+description = "kompress-super-ultra 128-byte to 32-byte ternary fold with CRC-8 frames"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/8b-is/wukong-zeno"
+
+[lib]
+name = "mem8_wave"
+path = "src/lib.rs"
+
+[dependencies]
+pivot-abi = { path = "../pivot-abi", version = "0.2.0" }

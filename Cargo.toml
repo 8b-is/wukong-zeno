@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/pivot-abi",
+    "crates/felix-simd",
+    "crates/mem8-wave",
+    "crates/regularity-oracle",
+    "crates/phoenix-capsule",
+]
+
+[package]
+name = "wukong-zeno"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.83"
+authors = ["Peter Jozsef Lodri <peter@8b.is>"]
+description = "OS-agnostic p/q balanced-ternary kernels, kompress-super-ultra fold, and qULB capability capsules"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/8b-is/wukong-zeno"
+publish = false
+
+[lib]
+name = "wukong_zeno"
+path = "src/lib.rs"
+
+[dev-dependencies]
+pivot-abi = { path = "crates/pivot-abi" }
+felix-simd = { path = "crates/felix-simd" }
+mem8-wave = { path = "crates/mem8-wave" }
+regularity-oracle = { path = "crates/regularity-oracle" }
+phoenix-capsule = { path = "crates/phoenix-capsule" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
