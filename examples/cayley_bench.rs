@@ -128,7 +128,7 @@ fn main() {
     // 3. Float baseline over the same gate sequence; report drift only.
     let mut float_state = [0.0f64; LANES];
     for (lane, slot) in float_state.iter_mut().enumerate() {
-        *slot = seed[lane].num as f64 / 8.0;
+        *slot = seed[lane].num as f64 / seed[lane].den.get() as f64;
     }
     let float_initial = float_energy(&float_state);
     for step in 0..STEPS {
