@@ -221,3 +221,69 @@ Each spec risk gets its check in the owning task:
 | CSR orientation vs undirected shadow graph | Task 2 adds both directions and asserts `Σ = 0` |
 | Shadow edges vanish after compression | Task 2 prints and asserts `shadow_edges=3` |
 | Float leaks into library crates | Task 1/2 clippy gate with `--all-targets -D warnings` |
+
+---
+
+### Task 3: Branchless 𝔽ₚ₃₁ round-trip benchmark (extension, post-review)
+
+**Files:**
+- Create: `examples/fp31_bench.rs`
+
+**Interfaces:**
+- Consumes: `pivot_abi::RationalPQ`, `wukong_zeno::fnv1a64`.
+- Produces: nothing importable.
+
+- [ ] **Step 1: Implement `Fp31` locally in the example**
+
+`P = 0x7FFF_FFFF`. Branchless double Mersenne fold, no `%` and no division:
+
+```rust
+const fn mul(self, rhs: Self) -> Self {
+    let prod = (self.0 as u64) * (rhs.0 as u64);
+    let p = Self::P as u64;
+    let s1 = (prod & p) + (prod >> 31);
+    let s2 = ((s1 & p) + (s1 >> 31)) as u32;
+    Self(if s2 >= Self::P { s2 - Self::P } else { s2 })
+}
+```
+
+Add `add`, `sub`, `pow`, `inv` (Fermat `P-2`), `from_i32`, and `RationalPQ::to_fp31` (numerator mod P times denominator inverse mod P; panic if denominator ≡ 0).
+Add `CayleyGateFp31::from_rs(r, s)` with `c=(s²-r²)/(s²+r²)`, `σ=2rs/(s²+r²)`, and `apply_forward` / `apply_inverse` (U and Uᵀ).
+
+- [ ] **Step 2: Round-trip path**
+
+16 lanes seeded from `RationalPQ::from_ratio(raw, 8)` projected into `Fp31`. Four non-commuting gates on pairs `(5,13),(9,1),(2,7),(3,12)`. `ROUNDS = 250_000`: forward pass ×4 per round, then reverse pass ×4 per round = **2,000,000 gate applications**.
+
+Assert:
+- midpoint and final 𝔽ₚ L2 energy equal the initial energy (`u64` equality, `P` field arithmetic);
+- after the reverse pass every one of the 16 lanes equals its seed **bit-for-bit**;
+- print `fp31_reversal_errors=0` and fail the process otherwise.
+
+- [ ] **Step 3: f32/f64 baselines**
+
+Same gate schedule and seeds in `f32` and `f64`; forward then inverse. Report:
+- `ns_per_gate` for each backend (integer, from `Instant::now()`; wall-clock is allowed here);
+- midpoint L2 drift and `max |Δψ|` for the float backends, in scientific notation;
+- float reversal error must be **reported**, never asserted to be nonzero (it may be tiny but nonzero; do not fabricate).
+
+Print:
+```
+fp31          : gates=2000000 ns_per_gate=<n> energy_equal=true reversal_errors=0
+fp31 digest   : 0x<16 hex>
+f32           : ns_per_gate=<n> energy_drift=<sci> max_delta=<sci>
+f64           : ns_per_gate=<n> energy_drift=<sci> max_delta=<sci>
+```
+
+- [ ] **Step 4: Verify**
+
+Run: `cargo run --release --example fp31_bench`
+Expected: exit 0; `energy_equal=true`; `reversal_errors=0`.
+Run: `cargo clippy --workspace --all-targets -- -D warnings`
+Expected: clean.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add examples/fp31_bench.rs
+git commit -m "feat(examples): branchless Fp31 Cayley round-trip benchmark"
+```
